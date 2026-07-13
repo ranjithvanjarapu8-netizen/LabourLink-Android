@@ -43,7 +43,7 @@ public class FindWorkersActivity extends AppCompatActivity {
     private String profession;
     private String date;
     private String location;
-
+    private Long professionId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +65,7 @@ public class FindWorkersActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         profession = intent.getStringExtra("profession");
+        professionId = intent.getLongExtra("professionId", 0);
         date = intent.getStringExtra("date");
         location = intent.getStringExtra("location");
         latitude = intent.getDoubleExtra("latitude", 0);
@@ -76,12 +77,12 @@ public class FindWorkersActivity extends AppCompatActivity {
         adapter = new WorkerAdapter(
                 this,
                 workerList,
+                professionId,
                 profession,
                 date,
                 location,
                 latitude,
                 longitude
-
         );
 
         recyclerWorkers.setAdapter(adapter);

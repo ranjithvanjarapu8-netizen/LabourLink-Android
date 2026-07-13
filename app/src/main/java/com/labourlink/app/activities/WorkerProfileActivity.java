@@ -37,7 +37,7 @@ public class WorkerProfileActivity extends AppCompatActivity {
     private TextView txtJoined;
     private TextView txtAddress;
     private TextView txtAvailability;
-
+    private Long professionId;
     private ChipGroup chipSkills;
 
     private MaterialButton btnHireWorker;
@@ -51,8 +51,6 @@ public class WorkerProfileActivity extends AppCompatActivity {
     private double latitude;
     private double longitude;
 
-    private static final String IMAGE_BASE_URL =
-            "http://10.12.91.182:8080/uploads/workers/";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -90,6 +88,8 @@ public class WorkerProfileActivity extends AppCompatActivity {
 
         workerId =
                 getIntent().getLongExtra("workerId",0);
+        professionId =
+                getIntent().getLongExtra("professionId", 0);
 
         String selectedProfession =
                 getIntent().getStringExtra("profession");
@@ -123,6 +123,7 @@ public class WorkerProfileActivity extends AppCompatActivity {
             );
 
             intent.putExtra("workerId", workerId);
+            intent.putExtra("professionId", professionId);
 
             intent.putExtra(
                     "workerName",
@@ -142,7 +143,6 @@ public class WorkerProfileActivity extends AppCompatActivity {
             );
             intent.putExtra("latitude", latitude);
             intent.putExtra("longitude", longitude);
-
             // Location selected in Hire Requirements
             intent.putExtra(
                     "location",
@@ -277,9 +277,8 @@ public class WorkerProfileActivity extends AppCompatActivity {
                 !worker.getProfilePhoto().isEmpty()) {
 
             Glide.with(this)
-                    .load(IMAGE_BASE_URL + worker.getProfilePhoto())
-                    .placeholder(R.mipmap.ic_launcher)
-                    .error(R.mipmap.ic_launcher)
+                    .load(worker.getProfilePhoto())
+                    .circleCrop()
                     .into(imgProfile);
 
         } else {

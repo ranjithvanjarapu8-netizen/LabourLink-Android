@@ -15,14 +15,15 @@ import com.labourlink.app.R;
 import com.labourlink.app.models.OwnerRequest;
 
 import java.util.List;
+import android.content.Intent;
+import android.widget.Button;
 
+import com.labourlink.app.activities.LiveTrackingActivity;
 public class OwnerRequestAdapter extends RecyclerView.Adapter<OwnerRequestAdapter.ViewHolder> {
 
     private Context context;
     private List<OwnerRequest> requestList;
 
-    private static final String IMAGE_BASE_URL =
-            "http://10.12.91.182:8080/uploads/workers/";
 
     public OwnerRequestAdapter(Context context,
                                List<OwnerRequest> requestList) {
@@ -75,9 +76,29 @@ public class OwnerRequestAdapter extends RecyclerView.Adapter<OwnerRequestAdapte
             holder.txtPhone.setText(
                     "Phone : " + request.getPhoneNumber());
 
+            holder.btnTrackWorker.setVisibility(View.VISIBLE);
+
+            holder.btnTrackWorker.setOnClickListener(v -> {
+
+                Intent intent = new Intent(
+                        context,
+                        LiveTrackingActivity.class
+                );
+
+                intent.putExtra(
+                        "requestId",
+                        request.getRequestId()
+                );
+
+                context.startActivity(intent);
+
+            });
+
         } else {
 
             holder.txtPhone.setVisibility(View.GONE);
+
+            holder.btnTrackWorker.setVisibility(View.GONE);
 
         }
 
@@ -119,9 +140,11 @@ public class OwnerRequestAdapter extends RecyclerView.Adapter<OwnerRequestAdapte
                 !request.getProfilePhoto().isEmpty()) {
 
             Glide.with(context)
-                    .load(IMAGE_BASE_URL + request.getProfilePhoto())
+                    .load(request.getProfilePhoto())
                     .placeholder(R.mipmap.ic_launcher)
+                    .error(R.mipmap.ic_launcher)
                     .into(holder.imgWorker);
+            
 
         } else {
 
@@ -151,7 +174,7 @@ public class OwnerRequestAdapter extends RecyclerView.Adapter<OwnerRequestAdapte
         TextView txtAddress;
         TextView txtPhone;
         TextView txtStatus;
-
+        Button btnTrackWorker;
         public ViewHolder(@NonNull View itemView) {
 
             super(itemView);
@@ -173,6 +196,8 @@ public class OwnerRequestAdapter extends RecyclerView.Adapter<OwnerRequestAdapte
             txtPhone = itemView.findViewById(R.id.txtPhone);
 
             txtStatus = itemView.findViewById(R.id.txtStatus);
+
+            btnTrackWorker = itemView.findViewById(R.id.btnTrackWorker);
 
         }
 

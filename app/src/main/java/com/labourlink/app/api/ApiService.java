@@ -1,7 +1,10 @@
 package com.labourlink.app.api;
 
+import com.labourlink.app.models.LiveLocationDto;
+import com.labourlink.app.models.LocationRequest;
 import com.labourlink.app.models.LoginRequest;
 import com.labourlink.app.models.LoginResponse;
+import com.labourlink.app.models.TrackingStatusDto;
 import com.labourlink.app.models.UserInfo;
 import com.labourlink.app.models.VerifyForgotOtpRequest;
 import com.labourlink.app.models.ResetPasswordRequest;
@@ -148,5 +151,19 @@ Call<List<NearbyWorker>> getNearbyWorkers(
     @GET("/api/worker/userinfo")
     Call<UserInfo> getUserInfo(
             @Header("Authorization") String token
+    );
+    @POST("/worker/location")
+    Call<ResponseBody> updateLocation(
+            @Header("Authorization") String token,
+            @Body LocationRequest request
+    );
+    @GET("/worker/location/status")
+    Call<TrackingStatusDto> getTrackingStatus(
+            @Header("Authorization") String token
+    );
+    @GET("/worker/{requestId}/live-location")
+    Call<LiveLocationDto> getLiveLocation(
+            @Header("Authorization") String token,
+            @Path("requestId") Long requestId
     );
 }

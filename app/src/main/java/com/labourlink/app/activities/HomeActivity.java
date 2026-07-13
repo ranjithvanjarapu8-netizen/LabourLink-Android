@@ -17,6 +17,16 @@ import com.labourlink.app.models.Worker;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import androidx.core.content.ContextCompat;
+
+import com.labourlink.app.services.LocationTrackingService;
+import com.labourlink.app.utils.TrackingStatusManager;import com.labourlink.app.utils.LocationHelper;
+import androidx.annotation.NonNull;
+import android.content.pm.PackageManager;
+import android.Manifest;
+import androidx.core.app.ActivityCompat;
+import android.util.Log;
+
 public class HomeActivity extends AppCompatActivity {
 
     private MaterialCardView btnFindWorkers;
@@ -28,7 +38,11 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        LocationHelper locationHelper = new LocationHelper(this);
 
+        if (!locationHelper.hasLocationPermission()) {
+            locationHelper.requestLocationPermission();
+        }
         SharedPreferences preferences =
                 getSharedPreferences("LabourLink", MODE_PRIVATE);
 
@@ -97,11 +111,56 @@ public class HomeActivity extends AppCompatActivity {
 
                 if (response.isSuccessful()) {
 
-                    Intent intent = new Intent(
-                            HomeActivity.this,
-                            MyWorkerProfileActivity.class
-                    );
-                    startActivity(intent);
+                    TrackingStatusManager trackingManager =
+                            new TrackingStatusManager(HomeActivity.this);
+
+                    trackingManager.checkTrackingStatus(enabled -> {
+
+                        if (enabled) {
+
+                            Intent serviceIntent = new Intent(
+                                    HomeActivity.this,
+                                    LocationTrackingService.class
+                            );
+
+                            if (ContextCompat.checkSelfPermission(
+                                    HomeActivity.this,
+                                    Manifest.permission.ACCESS_FINE_LOCATION
+                            ) == PackageManager.PERMISSION_GRANTED) {
+                                Log.d("LabourLink", "About to start LocationTrackingService");
+                                ContextCompat.startForegroundService(
+                                        HomeActivity.this,
+                                        serviceIntent
+                                );
+
+                            } else {
+
+                                Toast.makeText(
+                                        HomeActivity.this,
+                                        "Please grant location permission first.",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+
+                                ActivityCompat.requestPermissions(
+                                        HomeActivity.this,
+                                        new String[]{
+                                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                                Manifest.permission.ACCESS_COARSE_LOCATION
+                                        },
+                                        LocationHelper.getPermissionRequestCode()
+                                );
+                            }
+
+                        }
+
+                        Intent intent = new Intent(
+                                HomeActivity.this,
+                                MyWorkerProfileActivity.class
+                        );
+
+                        startActivity(intent);
+
+                    });
 
                 } else if (response.code() == 404) {
 
@@ -157,5 +216,28 @@ public class HomeActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == LocationHelper.getPermissionRequestCode()) {
+
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                Toast.makeText(this,
+                        "Location permission granted",
+                        Toast.LENGTH_SHORT).show();
+
+            } else {
+
+                Toast.makeText(this,
+                        "Location permission is required for live tracking",
+                        Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }

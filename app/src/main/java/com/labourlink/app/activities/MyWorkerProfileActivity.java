@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
@@ -208,11 +208,9 @@ public class MyWorkerProfileActivity extends AppCompatActivity {
         }
         if (worker.getProfilePhoto() != null &&
                 !worker.getProfilePhoto().isEmpty()) {
-
             Glide.with(this)
-                    .load("http://10.12.91.182:8080/uploads/workers/" + worker.getProfilePhoto())
-                    .placeholder(R.drawable.ic_person)
-                    .error(R.drawable.ic_person)
+                    .load(worker.getProfilePhoto())
+                    .circleCrop()
                     .into(imgProfile);
 
         } else {

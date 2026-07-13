@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -22,20 +25,20 @@
         <activity
             android:name=".activities.SplashActivity"
             android:exported="true">
-
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".activities.LoginActivity"
-            android:exported="false"/>
+            android:exported="false" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_GOOGLE_MAPS_API_KEY"/>
+            android:value="YOUR_GOOGLE_MAPS_API_KEY" />
+
         <activity
             android:name=".activities.HomeActivity"
             android:exported="false" />
@@ -105,6 +108,17 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".activities.OwnerCompletedRequestsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <service
+            android:name=".services.LocationTrackingService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
+        <activity
+            android:name=".activities.LiveTrackingActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>

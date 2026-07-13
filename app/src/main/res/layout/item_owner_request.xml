@@ -114,6 +114,13 @@
             android:textColor="#1976D2"
             android:textStyle="bold"
             android:visibility="gone"/>
+        <Button
+            android:id="@+id/btnTrackWorker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📍 Track Worker"
+            android:visibility="gone"
+            android:layout_marginTop="8dp"/>
 
     </LinearLayout>
 

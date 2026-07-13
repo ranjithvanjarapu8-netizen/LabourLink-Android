@@ -30,24 +30,24 @@ public class WorkerAdapter extends RecyclerView.Adapter<WorkerAdapter.WorkerView
 
     private double latitude;
     private double longitude;
-
+    private Long professionId;
     // Change this to your server IP
-    private static final String IMAGE_BASE_URL =
-            "http://10.12.91.182:8080/uploads/";
 
     public WorkerAdapter(
             Context context,
             List<NearbyWorker> workerList,
+            Long professionId,
             String profession,
             String workDate,
             String location,
             double latitude,
             double longitude
-    ) {
+    ){
 
         this.context = context;
         this.workerList = workerList;
 
+        this.professionId = professionId;
         this.profession = profession;
         this.workDate = workDate;
         this.location = location;
@@ -92,8 +92,9 @@ public class WorkerAdapter extends RecyclerView.Adapter<WorkerAdapter.WorkerView
                 "₹" + worker.getDailyWage() + " / day");
 
         Glide.with(context)
-                .load(IMAGE_BASE_URL + worker.getProfilePhoto())
+                .load(worker.getProfilePhoto())
                 .placeholder(R.drawable.ic_launcher_foreground)
+                .error(R.drawable.ic_launcher_foreground)
                 .into(holder.imgWorker);
 
         holder.btnViewProfile.setOnClickListener(v -> {
@@ -104,6 +105,7 @@ public class WorkerAdapter extends RecyclerView.Adapter<WorkerAdapter.WorkerView
             );
 
             intent.putExtra("workerId", worker.getWorkerId());
+            intent.putExtra("professionId", professionId);
 
             intent.putExtra("distance", worker.getDistance());
 

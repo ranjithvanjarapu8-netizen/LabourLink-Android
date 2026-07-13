@@ -303,7 +303,8 @@ public class BookingActivity extends AppCompatActivity {
 
         dialog.show();
 
-    }private void sendWorkRequest() {
+    }
+    private void sendWorkRequest() {
 
         if (selectedService == null) {
 
@@ -352,31 +353,26 @@ public class BookingActivity extends AppCompatActivity {
         SendRequest request = new SendRequest();
 
         request.setWorkerId(workerId);
-
         request.setProfessionId(professionId);
-
-        request.setTitle(
-                edtTitle.getText().toString().trim()
-        );
-
-        // Description removed from app
+        request.setTitle(edtTitle.getText().toString().trim());
         request.setDescription("");
-
-        request.setAddress(
-                txtLocation.getText().toString()
-        );
-
+        request.setAddress(txtLocation.getText().toString());
         request.setLatitude(latitude);
-
         request.setLongitude(longitude);
-
-        request.setWorkDate(
-                txtWorkDate.getText().toString()
-        );
-
+        request.setWorkDate(txtWorkDate.getText().toString());
         request.setStartTime(startTime);
-
         request.setEndTime(endTime);
+
+        // ===== Log request values =====
+        android.util.Log.d("SEND_REQUEST", "WorkerId: " + workerId);
+        android.util.Log.d("SEND_REQUEST", "ProfessionId: " + professionId);
+        android.util.Log.d("SEND_REQUEST", "Title: " + request.getTitle());
+        android.util.Log.d("SEND_REQUEST", "Address: " + request.getAddress());
+        android.util.Log.d("SEND_REQUEST", "Latitude: " + request.getLatitude());
+        android.util.Log.d("SEND_REQUEST", "Longitude: " + request.getLongitude());
+        android.util.Log.d("SEND_REQUEST", "WorkDate: " + request.getWorkDate());
+        android.util.Log.d("SEND_REQUEST", "StartTime: " + request.getStartTime());
+        android.util.Log.d("SEND_REQUEST", "EndTime: " + request.getEndTime());
 
         apiService.sendRequest(
                 "Bearer " + token,
@@ -387,11 +383,18 @@ public class BookingActivity extends AppCompatActivity {
             public void onResponse(Call<ResponseBody> call,
                                    Response<ResponseBody> response) {
 
+                android.util.Log.d("SEND_REQUEST",
+                        "Response Code: " + response.code());
+
                 if (response.isSuccessful()) {
 
                     try {
 
-                        String message = response.body().string();
+                        String message = response.body() != null
+                                ? response.body().string()
+                                : "Success";
+
+                        android.util.Log.d("SEND_REQUEST", message);
 
                         Toast.makeText(
                                 BookingActivity.this,
@@ -399,38 +402,59 @@ public class BookingActivity extends AppCompatActivity {
                                 Toast.LENGTH_LONG
                         ).show();
 
+                        finish();
+
+                    } catch (Exception e) {
+
+                        e.printStackTrace();
+                    }
+
+                } else {
+
+                    try {
+
+                        String error = response.errorBody() != null
+                                ? response.errorBody().string()
+                                : "Unknown Error";
+
+                        android.util.Log.e("SEND_REQUEST",
+                                "Error: " + error);
+
+                        Toast.makeText(
+                                BookingActivity.this,
+                                "Error " + response.code() + "\n" + error,
+                                Toast.LENGTH_LONG
+                        ).show();
+
                     } catch (Exception e) {
 
                         e.printStackTrace();
 
+                        Toast.makeText(
+                                BookingActivity.this,
+                                "HTTP Error: " + response.code(),
+                                Toast.LENGTH_LONG
+                        ).show();
                     }
-
-                    finish();
-
-                } else {
-
-                    Toast.makeText(
-                            BookingActivity.this,
-                            "Unable to send request.",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
                 }
-
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call,
                                   Throwable t) {
 
+                android.util.Log.e("SEND_REQUEST",
+                        "Failure", t);
+
                 Toast.makeText(
                         BookingActivity.this,
                         t.getMessage(),
                         Toast.LENGTH_LONG
                 ).show();
-
             }
 
         });
+
+
 
     }}

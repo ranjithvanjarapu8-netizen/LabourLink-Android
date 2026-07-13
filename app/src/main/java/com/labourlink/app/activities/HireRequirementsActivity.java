@@ -143,11 +143,18 @@ public class HireRequirementsActivity extends AppCompatActivity {
                     FindWorkersActivity.class
             );
 
+            Profession selectedProfession =
+                    (Profession) spinnerProfession.getSelectedItem();
+
             intent.putExtra(
                     "profession",
-                    ((Profession) spinnerProfession.getSelectedItem()).getName()
+                    selectedProfession.getName()
             );
 
+            intent.putExtra(
+                    "professionId",
+                    selectedProfession.getId()
+            );
             intent.putExtra(
                     "date",
                     etWorkDate.getText().toString()
