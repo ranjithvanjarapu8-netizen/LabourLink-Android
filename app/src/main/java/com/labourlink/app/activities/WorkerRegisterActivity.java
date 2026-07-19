@@ -1,5 +1,5 @@
 package com.labourlink.app.activities;
-
+import java.io.ByteArrayOutputStream;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -57,8 +57,11 @@ import com.google.android.material.textfield.TextInputEditText;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.widget.ImageView;
 import android.content.SharedPreferences;
-
+import com.google.android.material.imageview.ShapeableImageView;
 
 public class WorkerRegisterActivity extends AppCompatActivity {
 
@@ -77,7 +80,10 @@ public class WorkerRegisterActivity extends AppCompatActivity {
     private String state = "";
     private String fullAddress = "";
     private ChipGroup chipProfession;
+    private ShapeableImageView ivProfilePhoto;
+    private MaterialButton btnSelectPhoto;
 
+    private Uri selectedImageUri;
     private ApiService apiService;
     private MaterialButton btnRegister;
     private TextInputEditText etExperience;
@@ -133,6 +139,21 @@ public class WorkerRegisterActivity extends AppCompatActivity {
                         }
 
                     });
+    private final ActivityResultLauncher<Intent> imagePickerLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+
+                        if (result.getResultCode() == RESULT_OK &&
+                                result.getData() != null) {
+
+                            selectedImageUri = result.getData().getData();
+
+                            ivProfilePhoto.setImageURI(selectedImageUri);
+
+                        }
+
+                    });
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -151,6 +172,8 @@ public class WorkerRegisterActivity extends AppCompatActivity {
         etName = findViewById(R.id.etName);
         etPhone = findViewById(R.id.etPhone);
         etAadhaar = findViewById(R.id.etAadhaar);
+        ivProfilePhoto = findViewById(R.id.ivProfilePhoto);
+        btnSelectPhoto = findViewById(R.id.btnSelectPhoto);
         fusedLocationClient =
                 LocationServices.getFusedLocationProviderClient(this);
 
@@ -168,6 +191,16 @@ public class WorkerRegisterActivity extends AppCompatActivity {
         loadProfessions();
         loadUserInfo();
         btnRegister.setOnClickListener(v -> registerWorker());
+        btnSelectPhoto.setOnClickListener(v -> {
+
+            Intent intent = new Intent(
+                    Intent.ACTION_PICK,
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            );
+
+            imagePickerLauncher.launch(intent);
+
+        });
     }
     private void loadUserInfo() {
 
@@ -337,42 +370,67 @@ public class WorkerRegisterActivity extends AppCompatActivity {
         );
 
 // Read default image from drawable
-        byte[] bytes;
-
-        try {
-
-            InputStream inputStream =
-                    getResources().openRawResource(R.raw.default_worker);
-
-            bytes = new byte[inputStream.available()];
-
-            inputStream.read(bytes);
-
-            inputStream.close();
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
+        if (selectedImageUri == null) {
 
             Toast.makeText(this,
-                    "Unable to read default image",
+                    "Please select a profile photo",
                     Toast.LENGTH_SHORT).show();
 
             return;
         }
 
-        RequestBody imageBody = RequestBody.create(
-                bytes,
-                MediaType.parse("image/jpeg")
-        );
+        MultipartBody.Part photo;
 
-        MultipartBody.Part photo =
-                MultipartBody.Part.createFormData(
-                        "photo",
-                        "default_worker.jpg",
-                        imageBody
-                );
+        try {
 
+            InputStream inputStream =
+                    getContentResolver().openInputStream(selectedImageUri);
+
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+            byte[] data = new byte[4096];
+
+            int nRead;
+
+            while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+
+                buffer.write(data, 0, nRead);
+
+            }
+
+            buffer.flush();
+
+            inputStream.close();
+
+            byte[] bytes = buffer.toByteArray();
+
+            String mimeType = getContentResolver().getType(selectedImageUri);
+
+            if (mimeType == null) {
+                mimeType = "image/jpeg";
+            }
+
+            RequestBody imageBody = RequestBody.create(
+                    bytes,
+                    MediaType.parse(mimeType)
+            );
+
+            photo = MultipartBody.Part.createFormData(
+                    "photo",
+                    "profile.jpg",
+                    imageBody
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Toast.makeText(this,
+                    "Unable to read selected image",
+                    Toast.LENGTH_SHORT).show();
+
+            return;
+        }
         apiService.registerWorker(
                 token,
                 workerBody,
